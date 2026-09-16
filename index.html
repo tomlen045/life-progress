@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>人生进度条</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0e1a;color:#e8ecf7;font-family:-apple-system,'PingFang SC',sans-serif;min-height:100vh}
+.wrap{max-width:480px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:24px;text-align:center;margin:8px 0 4px}
+.sub{text-align:center;color:#7c86a8;font-size:13px;margin-bottom:26px}
+.card{background:#131a2e;border:1px solid #232c4a;border-radius:18px;padding:22px 20px;margin-bottom:14px}
+.bl{margin-bottom:20px}
+.bl .t{display:flex;justify-content:space-between;font-size:14px;color:#9aa6cc;margin-bottom:8px}
+.bl .t b{color:#fff;font-size:15px}
+.bl .track{height:14px;background:#1d2742;border-radius:99px;overflow:hidden}
+.bl .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#4f7cff,#9b5cff);transition:width 1s ease}
+.big{font-size:40px;font-weight:900;text-align:center;background:linear-gradient(90deg,#4f7cff,#c15cff);-webkit-background-clip:text;background-clip:text;color:transparent;margin:6px 0}
+.q{margin-top:22px;font-size:14px;color:#8f9bc0;line-height:2;text-align:center}
+.inp{background:#1d2742;border:1px solid #2c3a63;color:#fff;border-radius:12px;padding:12px 14px;font-size:16px;width:100%}
+.btn{width:100%;background:linear-gradient(90deg,#4f7cff,#9b5cff);color:#fff;border:none;border-radius:99px;padding:15px;font-size:17px;font-weight:bold;cursor:pointer;margin-top:16px}
+.fact{font-size:14px;color:#aab4d8;padding:10px 0;border-bottom:1px dashed #232c4a}
+.fact b{color:#ffd166}
+.foot{text-align:center;color:#5b6588;font-size:12px;margin-top:20px}
+canvas{max-width:100%;border-radius:16px;margin-top:14px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+<h1>⏳ 人生进度条</h1>
+<p class="sub">时间不会说话，但它一直在走</p>
+<div class="card">
+ <p style="font-size:14px;color:#9aa6cc;margin-bottom:12px;">输入你的出生日期，看看时间都去哪了</p>
+ <input class="inp" type="date" id="bd">
+ <button class="btn" onclick="go()">⏳ 打开时间之门</button>
+</div>
+<p class="q">“种一棵树最好的时间是十年前，其次是现在。”</p>
+<p class="foot">全部本地计算 · 不上传任何数据 · 小薅薅出品</p>
+</div>
+<script>
+const Q=["把每一个今天过好，就是对未来最大的诚意。","时间公平得残忍，也慷慨得吓人——它给每个人同样的24小时。","你此刻的焦虑，十年后回看都是路标。","所谓成长，就是把‘来不及’换成‘现在开始’。","人生不是轨道，是旷野。"];
+function go(){
+ const v=document.getElementById("bd").value;
+ if(!v){alert("先选出生日期");return;}
+ const b=new Date(v),now=new Date();
+ const days=Math.floor((now-b)/864e5);
+ const age=days/365.25;
+ const DOY=Math.ceil((now-new Date(now.getFullYear(),0,0))/864e5);
+ const YLEN=(now.getFullYear()%4===0&&(now.getFullYear()%100!==0||now.getFullYear()%400===0))?366:365;
+ const startOfWeek=new Date(now);startOfWeek.setHours(0,0,0,0);startOfWeek.setDate(now.getDate()-((now.getDay()+6)%7));
+ const weekP=Math.round((now-startOfWeek)/6e4/10080*100);
+ const mStart=new Date(now.getFullYear(),now.getMonth(),1);
+ const mEnd=new Date(now.getFullYear(),now.getMonth()+1,0,23,59);
+ const monthP=Math.round((now-mStart)/(mEnd-mStart)*100);
+ const yearP=Math.round(DOY/YLEN*100);
+ const lifeP=Math.min(100,Math.round(days/(80*365.25)*100));
+ const sundays60=Math.floor((60*365.25-days)/7);
+ const daysTo30=Math.round(30*365.25-days);
+ const beats=Math.round(days*24*60*72);
+ document.getElementById("app").innerHTML=`
+ <h1>⏳ 人生进度条</h1><p class="sub">出生 ${v} · 已在这个宇宙打卡 <b style="color:#ffd166">${days.toLocaleString()}</b> 天</p>
+ <div class="card"><p class="big">${yearP}%</p>
+ <div class="bl"><div class="t"><b>📜 2026 年进度</b><span>第 ${DOY} / ${YLEN} 天</span></div><div class="track"><div class="fill" style="width:${yearP}%"></div></div></div>
+ <div class="bl"><div class="t"><b>📅 本月进度</b><span>${monthP}%</span></div><div class="track"><div class="fill" style="width:${monthP}%"></div></div></div>
+ <div class="bl"><div class="t"><b>🗓 本周进度</b><span>${weekP}%</span></div><div class="track"><div class="fill" style="width:${weekP}%"></div></div></div>
+ <div class="bl"><div class="t"><b>🌌 人生进度</b><span>按 80 年计</span></div><div class="track"><div class="fill" style="width:${lifeP}%"></div></div></div>
+ </div>
+ <div class="card">
+  <p class="fact">❤️ 你的心脏已经跳了约 <b>${(beats/1e8).toFixed(1)} 亿次</b></p>
+  <p class="fact">🌅 你已经经历过 <b>${days.toLocaleString()}</b> 个日出</p>
+  <p class="fact">🏖 到 60 岁，还剩 <b>${sundays60.toLocaleString()}</b> 个周末</p>
+  <p class="fact">🎯 距离 30 岁，还有 <b>${daysTo30>0?daysTo30.toLocaleString()+" 天":"已经到了/已过"}</b></p>
+  <p class="fact">📚 剩余时间足够读完 <b>${Math.floor((80*365.25-days)/14)} 本</b>书（按两周一本）</p>
+ </div>
+ <div class="card"><p class="q">${Q[Math.floor(Math.random()*Q.length)]}</p></div>
+ <canvas id="cd" width="1080" height="1440" style="display:none"></canvas>
+ <button class="btn" onclick="draw(${yearP},${lifeP},${days})">🎴 生成人生卡片</button>
+ <button class="btn" style="background:#1d2742" onclick="location.reload()">🔄 换个生日</button>
+ <p class="foot">数据仅本地计算 · 小薅薅出品</p>`;
+}
+function draw(yearP,lifeP,days){
+ const c=document.getElementById("cd"),x=c.getContext("2d");
+ x.fillStyle="#0b0e1a";x.fillRect(0,0,1080,1440);
+ x.fillStyle="#4f7cff";x.font="bold 40px sans-serif";x.textAlign="left";x.fillText("⏳ 人生进度条",64,100);
+ x.fillStyle="#7c86a8";x.font="26px sans-serif";x.textAlign="right";x.fillText(new Date().toLocaleDateString(),1016,100);
+ function bar(y,label,pct,col){
+  x.textAlign="left";x.fillStyle="#e8ecf7";x.font="bold 32px sans-serif";x.fillText(label,64,y-24);
+  x.fillStyle="#1d2742";x.fillRect(64,y,952,40);
+  x.fillStyle=col;x.fillRect(64,y,952*pct/100,40);
+  x.textAlign="right";x.fillStyle="#fff";x.font="bold 30px sans-serif";x.fillText(pct+"%",1016,y+32);
+ }
+ bar(300,"2026 年进度",yearP,"#4f7cff");
+ bar(460,"人生进度（80年）",lifeP,"#9b5cff");
+ x.textAlign="center";x.fillStyle="#ffd166";x.font="bold 56px sans-serif";
+ x.fillText("已打卡 "+days.toLocaleString()+" 天",540,650);
+ x.fillStyle="#8f9bc0";x.font="28px sans-serif";
+ x.fillText("心跳 "+(days*24*60*72/1e8).toFixed(1)+" 亿次 · 日出 "+days.toLocaleString()+" 个",540,720);
+ x.fillStyle="#aab4d8";x.font="30px sans-serif";
+ x.fillText("种一棵树最好的时间是十年前",540,900);
+ x.fillText("其次是现在。",540,950);
+ x.fillStyle="#3fb950";x.font="bold 30px sans-serif";
+ x.fillText("🔍 搜「小薅薅」· 每天都有新东西",540,1360);
+ c.style.display="block";
+ const a=document.createElement("a");a.download="life-progress.png";a.href=c.toDataURL();a.click();
+}
+</script>
+</body>
+</html>
